@@ -13,7 +13,7 @@ public class Factory {
                     "jdbc:h2:tcp://localhost/~/test",
                     "evgen.knyzhenko",
                     "");
-            } catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
