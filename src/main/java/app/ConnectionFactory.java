@@ -3,7 +3,7 @@ package app;
 import java.sql.Connection;
 import java.sql.DriverManager;
 
-public class Factory {
+public class ConnectionFactory {
     private static Connection connection;
 
     static {

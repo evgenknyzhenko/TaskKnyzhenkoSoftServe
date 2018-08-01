@@ -1,6 +1,6 @@
 package app.dao;
 
-import app.Factory;
+import app.ConnectionFactory;
 import app.model.Department;
 import app.model.District;
 import app.model.Employee;
@@ -11,8 +11,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-public class ModelDaoImpl implements EmployeeDao {
-    private final Connection connection = Factory.getConnection();
+public class EmployeeDaoImpl implements EmployeeDao {
+    private final Connection connection = ConnectionFactory.getConnection();
 
     public void createTables(String companyName) {
         String createTablesQuery =

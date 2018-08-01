@@ -9,4 +9,6 @@ public interface EmployeeService {
     void saveEmployee(Employee employee);
 
     void saveDepartment(Department department);
+
+    void addTestData();
 }
