@@ -11,4 +11,6 @@ public interface EmployeeService {
     void saveDepartment(Department department);
 
     void addTestData();
+
+    void countEmployeesOfDepartment(int minAge, int maxEge, String districtName);
 }

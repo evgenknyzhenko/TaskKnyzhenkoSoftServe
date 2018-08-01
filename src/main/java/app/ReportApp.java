@@ -17,6 +17,8 @@ public class ReportApp {
 
         employeeService.saveEmployee(employee);*/
 
-        employeeService.addTestData();
+        //employeeService.addTestData();
+
+        employeeService.countEmployeesOfDepartment(20,80,"South America");
     }
 }

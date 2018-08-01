@@ -10,6 +10,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.HashMap;
+import java.util.Map;
 
 public class EmployeeDaoImpl implements EmployeeDao {
     private final Connection connection = ConnectionFactory.getConnection();
@@ -72,6 +74,36 @@ public class EmployeeDaoImpl implements EmployeeDao {
             System.out.println("Exception, department isn't saved");
         }
     }
+
+
+
+    public Map<String, Long> countEmployeesOfDepartment(int minAge, int maxEge, String districtName) {
+        Map<String, Long> result = new HashMap<String, Long>();
+        String query = "SELECT DEPARTMENTS.DEPARTMENT, COUNT (EMPLOYEES.NAME)\n" +
+                "FROM COMPANY_B.EMPLOYEES\n" +
+                "INNER JOIN COMPANY_B.DEPARTMENTS ON EMPLOYEES.FK_DEPARTMENT_ID=DEPARTMENTS.ID\n" +
+                "INNER JOIN COMPANY_B.DISTRICTS ON DEPARTMENTS.FK_DISTRICT_ID=DISTRICTS.ID\n" +
+                "WHERE DISTRICTS.DISTRICT=(?) AND EMPLOYEES.AGE>(?) AND EMPLOYEES.AGE<(?)\n" +
+                "GROUP BY DEPARTMENTS.DEPARTMENT";
+        try {
+            PreparedStatement statement = connection.prepareStatement(query);
+            statement.setString(1, districtName);
+            statement.setInt(2,minAge);
+            statement.setInt(3,maxEge);
+            ResultSet resultSet = statement.executeQuery();
+
+            while (resultSet.next()) {
+                result.put(resultSet.getString(1), resultSet.getLong(2));
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.out.println("Exception, query didn't give result");
+        }
+        return result;
+    }
+
+
 
     private long getIdByDepartment(Department department) {
         String query = "SELECT ID FROM COMPANY_B.DEPARTMENTS WHERE DEPARTMENT=?";
