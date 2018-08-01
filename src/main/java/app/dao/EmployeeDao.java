@@ -1,9 +1,9 @@
-package app.service;
+package app.dao;
 
 import app.model.Department;
 import app.model.Employee;
 
-public interface ModelService {
+public interface EmployeeDao {
     void createTables(String companyName);
 
     void saveEmployee(Employee employee);

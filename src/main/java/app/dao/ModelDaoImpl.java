@@ -5,9 +5,13 @@ import app.model.Department;
 import app.model.District;
 import app.model.Employee;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 
-public class ModelDaoImpl implements ModelDao {
+public class ModelDaoImpl implements EmployeeDao {
     private final Connection connection = Factory.getConnection();
 
     public void createTables(String companyName) {
@@ -40,7 +44,7 @@ public class ModelDaoImpl implements ModelDao {
             Statement statement = connection.createStatement();
             statement.executeUpdate(createTablesQuery);
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.out.println("Exception, tables isn't createt");
         }
     }
 
@@ -53,28 +57,28 @@ public class ModelDaoImpl implements ModelDao {
             statement.setLong(3, getIdByDepartment(employee.getDepartment()));
             statement.executeUpdate();
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.out.println("Exception, employee isn't saved");
         }
     }
 
     public void saveDepartment(Department department) {
         String query = "INSERT INTO COMPANY_B.DEPARTMENTS (DEPARTMENT, FK_DISTRICT_ID) VALUES(?,?)";
         try {
-            PreparedStatement statement2 = connection.prepareStatement(query);
-            statement2.setString(1, department.getDepartmentName());
-            statement2.setLong(2, getIdByDistrict(department.getDistrict()));
-            statement2.executeUpdate();
+            PreparedStatement statement = connection.prepareStatement(query);
+            statement.setString(1, department.getDepartmentName());
+            statement.setLong(2, getIdByDistrict(department.getDistrict()));
+            statement.executeUpdate();
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.out.println("Exception, department isn't saved");
         }
     }
 
     private long getIdByDepartment(Department department) {
         String query = "SELECT ID FROM COMPANY_B.DEPARTMENTS WHERE DEPARTMENT=?";
         try {
-            PreparedStatement statement3 = connection.prepareStatement(query);
-            statement3.setString(1, department.getDepartmentName());
-            ResultSet resultSet = statement3.executeQuery();
+            PreparedStatement statement = connection.prepareStatement(query);
+            statement.setString(1, department.getDepartmentName());
+            ResultSet resultSet = statement.executeQuery();
             resultSet.first();
             return resultSet.getLong(1);
         } catch (SQLException e) {
@@ -87,9 +91,9 @@ public class ModelDaoImpl implements ModelDao {
 
         String query = "SELECT ID FROM COMPANY_B.DISTRICTS WHERE DISTRICT=?";
         try {
-            PreparedStatement statement4 = connection.prepareStatement(query);
-            statement4.setString(1, district.getDistrictName());
-            ResultSet resultSet = statement4.executeQuery();
+            PreparedStatement statement = connection.prepareStatement(query);
+            statement.setString(1, district.getDistrictName());
+            ResultSet resultSet = statement.executeQuery();
             resultSet.first();
             return resultSet.getLong(1);
         } catch (Exception e) {
@@ -101,11 +105,11 @@ public class ModelDaoImpl implements ModelDao {
     private void saveDistrict(District district) {
         String query = "INSERT INTO COMPANY_B.DISTRICTS (DISTRICT) VALUES(?)";
         try {
-            PreparedStatement statement5 = connection.prepareStatement(query);
-            statement5.setString(1, district.getDistrictName());
-            statement5.executeUpdate();
+            PreparedStatement statement = connection.prepareStatement(query);
+            statement.setString(1, district.getDistrictName());
+            statement.executeUpdate();
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.out.println("Exception, district isn't saved");
         }
     }
 }
