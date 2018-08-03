@@ -6,7 +6,6 @@ import app.model.District;
 import app.model.Employee;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -18,19 +17,24 @@ public class EmployeeServiceImpl implements EmployeeService {
         this.employeeDao = employeeDao;
     }
 
-    public void createTables(String companyName) {
-        employeeDao.createTables(companyName);
+    public String createTables(String companyName) {
+        return employeeDao.createTables(companyName);
     }
 
-    public void saveEmployee(Employee employee) {
-        employeeDao.saveEmployee(employee);
+    public Employee saveEmployee(String companyName,Employee employee) {
+        return employeeDao.saveEmployee(companyName, employee);
     }
 
-    public void saveDepartment(Department department) {
-        employeeDao.saveDepartment(department);
+    public Department saveDepartment(String companyName, Department department) {
+        return employeeDao.saveDepartment(companyName, department);
     }
 
-    public void addTestData() {
+    @Override
+    public District saveDistrict(String companyName, District district) {
+        return employeeDao.saveDistrict(companyName, district);
+    }
+
+    public void addTestData(String companyName) {
         int count = 1;
         List<String> departmentNames = Arrays
                 .asList("IT", "Logistics", "Management", "Marketing", "Customer service", "Staff department");
@@ -39,21 +43,19 @@ public class EmployeeServiceImpl implements EmployeeService {
         Employee employee = new Employee(null, 0,
                 new Department(null, new District(null)));
 
-        for (int i = 0; i < 100000; i++) {
+        for (int i = 0; i < 1000; i++) {
             employee.setName("Empl_" + count);
             employee.setAge((int) (18 + Math.random() * 80));
-            employee.getDepartment().setDepartmentName(departmentNames.get((int) (Math.random() * 6)));
-            employee.getDepartment().getDistrict().setDistrictName(districtNames.get((int) (Math.random() * 5)));
+            employee.getDepartment().setDepartmentName(departmentNames.get((int)(Math.random() * 6)));
+            employee.getDepartment().getDistrict().setDistrictName(districtNames.get((int)(Math.random() * 5)));
             count++;
-            employeeDao.saveEmployee(employee);
+            employeeDao.saveEmployee(companyName,employee);
         }
     }
 
-    public void countEmployeesOfDepartment(int minAge, int maxEge, String districtName) {
+    public Map<String, Long> countEmployeesOfDepartment(int minAge, int maxEge, String districtName) {
         Map<String, Long> result = employeeDao.countEmployeesOfDepartment(minAge, maxEge, districtName);
-
-        System.out.println("Department | Employees");
-        result.forEach((k, v) -> System.out.println(k + " | " + v));
+        return result;
     }
 
 

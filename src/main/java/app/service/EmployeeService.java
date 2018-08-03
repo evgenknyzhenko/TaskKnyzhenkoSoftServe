@@ -1,16 +1,21 @@
 package app.service;
 
 import app.model.Department;
+import app.model.District;
 import app.model.Employee;
 
+import java.util.Map;
+
 public interface EmployeeService {
-    void createTables(String companyName);
+    String createTables(String companyName);
 
-    void saveEmployee(Employee employee);
+    Employee saveEmployee(String companyName, Employee employee);
 
-    void saveDepartment(Department department);
+    Department saveDepartment(String companyName, Department department);
 
-    void addTestData();
+    District saveDistrict(String companyName, District district);
 
-    void countEmployeesOfDepartment(int minAge, int maxEge, String districtName);
+    void addTestData(String companyName);
+
+    Map<String, Long> countEmployeesOfDepartment(int minAge, int maxEge, String districtName);
 }

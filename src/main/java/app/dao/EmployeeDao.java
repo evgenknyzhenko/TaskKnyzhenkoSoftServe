@@ -1,16 +1,19 @@
 package app.dao;
 
 import app.model.Department;
+import app.model.District;
 import app.model.Employee;
 
 import java.util.Map;
 
 public interface EmployeeDao {
-    void createTables(String companyName);
+    String createTables(String companyName);
 
-    void saveEmployee(Employee employee);
+    Employee saveEmployee(String companyName, Employee employee);
 
-    void saveDepartment(Department department);
+    Department saveDepartment(String companyName, Department department);
+
+    District saveDistrict(String companyName, District district);
 
     Map<String,Long> countEmployeesOfDepartment(int minAge, int maxEge, String districtName);
 }

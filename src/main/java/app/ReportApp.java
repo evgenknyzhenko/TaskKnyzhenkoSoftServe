@@ -1,24 +1,23 @@
 package app;
 
+
 import app.dao.EmployeeDaoImpl;
-import app.model.Department;
-import app.model.District;
-import app.model.Employee;
 import app.service.EmployeeService;
 import app.service.EmployeeServiceImpl;
+
+import java.util.Map;
 
 public class ReportApp {
     public static void main(String[] args) {
         EmployeeService employeeService = new EmployeeServiceImpl(new EmployeeDaoImpl());
-        //employeeService.createTables("COMPANY_B");
+        employeeService.createTables("COMPANY_A");
+        employeeService.createTables("COMPANY_B");
 
-        /*Employee employee = new Employee("Petro", 29,
-                new Department("Office", new District("Europe")));
+        employeeService.addTestData("COMPANY_A");
+        employeeService.addTestData("COMPANY_B");
 
-        employeeService.saveEmployee(employee);*/
-
-        //employeeService.addTestData();
-
-        employeeService.countEmployeesOfDepartment(20,80,"South America");
+        Map<String, Long> result = employeeService.countEmployeesOfDepartment(0,100,"South America");
+        System.out.println("Department | Employees");
+        result.forEach((k, v) -> System.out.println(k + " | " + v));
     }
 }

@@ -1,20 +1,26 @@
 package app;
 
+import java.io.FileInputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.util.Properties;
 
 public class ConnectionFactory {
     private static Connection connection;
 
     static {
         try {
-            Class.forName("org.h2.Driver");
+            FileInputStream fis = new FileInputStream("src/main/resources/db.properties");
+            Properties properties = new Properties();
+            properties.load(fis);
+
+            Class.forName(properties.getProperty("driverClass"));
             connection = DriverManager.getConnection(
-                    "jdbc:h2:tcp://localhost/~/test",
-                    "evgen.knyzhenko",
-                    "");
+                    properties.getProperty("url"),
+                    properties.getProperty("userName"),
+                    properties.getProperty("password"));
         } catch (Exception e) {
-            e.printStackTrace();
+            throw new RuntimeException("Failed  to create data base connection", e);
         }
     }
 

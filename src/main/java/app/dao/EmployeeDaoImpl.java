@@ -16,97 +16,130 @@ import java.util.Map;
 public class EmployeeDaoImpl implements EmployeeDao {
     private final Connection connection = ConnectionFactory.getConnection();
 
-    public void createTables(String companyName) {
+    public String createTables(String companyName) {
         String createTablesQuery =
                 "CREATE SCHEMA " + companyName + ";\n" +
 
-                        "CREATE TABLE " + companyName + ".DISTRICTS (\n" +
-                        "ID BIGINT PRIMARY KEY AUTO_INCREMENT,\n" +
-                        "DISTRICT VARCHAR(100) NOT NULL,\n" +
-                        "UNIQUE(DISTRICT));\n" +
+                        "CREATE TABLE " + companyName + ".DISTRICTS (" +
+                        "ID BIGINT PRIMARY KEY AUTO_INCREMENT," +
+                        "DISTRICT VARCHAR(100) NOT NULL," +
+                        "UNIQUE(DISTRICT));" +
 
-                        "CREATE TABLE " + companyName + ".DEPARTMENTS (\n" +
-                        "ID BIGINT PRIMARY KEY AUTO_INCREMENT,\n" +
-                        "DEPARTMENT VARCHAR(100) NOT NULL,\n" +
-                        "FK_DISTRICT_ID BIGINT NOT NULL ,\n" +
-                        "UNIQUE(DEPARTMENT),\n" +
-                        "CONSTRAINT FK_DEPARTMENTS_TO_DISTRICTS FOREIGN KEY (FK_DISTRICT_ID)\n" +
-                        "REFERENCES DISTRICTS (ID));\n" +
+                        "CREATE TABLE " + companyName + ".DEPARTMENTS (" +
+                        "ID BIGINT PRIMARY KEY AUTO_INCREMENT," +
+                        "DEPARTMENT VARCHAR(100) NOT NULL," +
+                        "FK_DISTRICT_ID BIGINT NOT NULL ," +
+                        "UNIQUE(DEPARTMENT)," +
+                        "CONSTRAINT FK_DEPARTMENTS_TO_DISTRICTS FOREIGN KEY (FK_DISTRICT_ID)" +
+                        "REFERENCES DISTRICTS (ID));" +
 
-                        "CREATE TABLE " + companyName + ".EMPLOYEES (\n" +
-                        "ID BIGINT PRIMARY KEY AUTO_INCREMENT,\n" +
-                        "NAME VARCHAR(100) NOT NULL,\n" +
-                        "AGE INT(3) NOT NULL,\n" +
-                        "UNIQUE(NAME),\n" +
-                        "FK_DEPARTMENT_ID BIGINT NOT NULL,\n" +
-                        "CONSTRAINT FK_EMPLOYEES_TO_DEPARTMENTS FOREIGN KEY (FK_DEPARTMENT_ID)\n" +
-                        "REFERENCES DEPARTMENTS (ID));\n";
-
+                        "CREATE TABLE " + companyName + ".EMPLOYEES (" +
+                        "ID BIGINT PRIMARY KEY AUTO_INCREMENT," +
+                        "NAME VARCHAR(100) NOT NULL," +
+                        "AGE INT(3) NOT NULL," +
+                        "UNIQUE(NAME)," +
+                        "FK_DEPARTMENT_ID BIGINT NOT NULL," +
+                        "CONSTRAINT FK_EMPLOYEES_TO_DEPARTMENTS FOREIGN KEY (FK_DEPARTMENT_ID)" +
+                        "REFERENCES DEPARTMENTS (ID))";
         try {
             Statement statement = connection.createStatement();
             statement.executeUpdate(createTablesQuery);
         } catch (SQLException e) {
-            System.out.println("Exception, tables isn't createt");
+            throw new RuntimeException("Failed to create tables", e);
         }
+        return "Tables are created";
     }
 
-    public void saveEmployee(Employee employee) {
-        String query = "INSERT INTO COMPANY_B.EMPLOYEES (NAME, AGE, FK_DEPARTMENT_ID) VALUES(?,?,?);";
+    public Employee saveEmployee(String companyName, Employee employee) {
+        String query = "INSERT INTO " + companyName + ".EMPLOYEES (NAME, AGE, FK_DEPARTMENT_ID) VALUES(?,?,?);";
         try {
             PreparedStatement statement = connection.prepareStatement(query);
             statement.setString(1, employee.getName());
             statement.setInt(2, employee.getAge());
-            statement.setLong(3, getIdByDepartment(employee.getDepartment()));
+            statement.setLong(3, getIdByDepartment(companyName, employee.getDepartment()));
             statement.executeUpdate();
         } catch (SQLException e) {
-            System.out.println("Exception, employee isn't saved");
+            throw new RuntimeException("Failed to save employee", e);
         }
+        return employee;
     }
 
-    public void saveDepartment(Department department) {
-        String query = "INSERT INTO COMPANY_B.DEPARTMENTS (DEPARTMENT, FK_DISTRICT_ID) VALUES(?,?)";
+    public Department saveDepartment(String companyName, Department department) {
+        String query = "INSERT INTO " + companyName + ".DEPARTMENTS (DEPARTMENT, FK_DISTRICT_ID) VALUES(?,?)";
         try {
             PreparedStatement statement = connection.prepareStatement(query);
             statement.setString(1, department.getDepartmentName());
-            statement.setLong(2, getIdByDistrict(department.getDistrict()));
+            statement.setLong(2, getIdByDistrict(companyName, department.getDistrict()));
             statement.executeUpdate();
         } catch (SQLException e) {
-            System.out.println("Exception, department isn't saved");
+            throw new RuntimeException("Failed to save department", e);
         }
+        return department;
     }
 
-
+    public District saveDistrict(String companyName, District district) {
+        String query = "INSERT INTO " + companyName + ".DISTRICTS (DISTRICT) VALUES(?)";
+        try {
+            PreparedStatement statement = connection.prepareStatement(query);
+            statement.setString(1, district.getDistrictName());
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to save district", e);
+        }
+        return district;
+    }
 
     public Map<String, Long> countEmployeesOfDepartment(int minAge, int maxEge, String districtName) {
-        Map<String, Long> result = new HashMap<String, Long>();
-        String query = "SELECT DEPARTMENTS.DEPARTMENT, COUNT (EMPLOYEES.NAME)\n" +
-                "FROM COMPANY_B.EMPLOYEES\n" +
-                "INNER JOIN COMPANY_B.DEPARTMENTS ON EMPLOYEES.FK_DEPARTMENT_ID=DEPARTMENTS.ID\n" +
-                "INNER JOIN COMPANY_B.DISTRICTS ON DEPARTMENTS.FK_DISTRICT_ID=DISTRICTS.ID\n" +
-                "WHERE DISTRICTS.DISTRICT=(?) AND EMPLOYEES.AGE>(?) AND EMPLOYEES.AGE<(?)\n" +
+        Map<String, Long> resultBothComanies = new HashMap<>();
+        String queryCompany_A = "SELECT DEPARTMENTS.DEPARTMENT, COUNT (EMPLOYEES.NAME) " +
+                "FROM COMPANY_A.EMPLOYEES " +
+                "INNER JOIN COMPANY_A.DEPARTMENTS ON EMPLOYEES.FK_DEPARTMENT_ID=DEPARTMENTS.ID " +
+                "INNER JOIN COMPANY_A.DISTRICTS ON DEPARTMENTS.FK_DISTRICT_ID=DISTRICTS.ID " +
+                "WHERE DISTRICTS.DISTRICT=(?) AND EMPLOYEES.AGE>(?) AND EMPLOYEES.AGE<(?) " +
                 "GROUP BY DEPARTMENTS.DEPARTMENT";
+        Map<String, Long> resultCompany_A = new HashMap<>(addResultToMap(queryCompany_A, minAge, maxEge, districtName));
+
+
+        String queryCompany_B = "SELECT DEPARTMENTS.DEPARTMENT, COUNT (EMPLOYEES.NAME)" +
+                "FROM COMPANY_B.EMPLOYEES " +
+                "INNER JOIN COMPANY_B.DEPARTMENTS ON EMPLOYEES.FK_DEPARTMENT_ID=DEPARTMENTS.ID " +
+                "INNER JOIN COMPANY_B.DISTRICTS ON DEPARTMENTS.FK_DISTRICT_ID=DISTRICTS.ID " +
+                "WHERE DISTRICTS.DISTRICT=(?) AND EMPLOYEES.AGE>(?) AND EMPLOYEES.AGE<(?) " +
+                "GROUP BY DEPARTMENTS.DEPARTMENT";
+        Map<String, Long> resultCompany_B = new HashMap<>(addResultToMap(queryCompany_B, minAge, maxEge, districtName));
+
+        resultBothComanies.putAll(resultCompany_A);
+        resultBothComanies.putAll(resultCompany_B);
+        resultCompany_A.forEach((k1,v1) -> {
+            resultCompany_B.forEach((k2,v2)->{
+                if (k1.equals(k2)) {
+                    resultBothComanies.put(k1, v1+v2);
+                }
+            });
+        });
+
+        return resultBothComanies;
+    }
+
+    private Map<String, Long> addResultToMap(String query, int minAge, int maxEge, String districtName) {
+        Map<String, Long> resultOneCompany = new HashMap<>();
         try {
             PreparedStatement statement = connection.prepareStatement(query);
             statement.setString(1, districtName);
-            statement.setInt(2,minAge);
-            statement.setInt(3,maxEge);
+            statement.setInt(2, minAge);
+            statement.setInt(3, maxEge);
             ResultSet resultSet = statement.executeQuery();
-
             while (resultSet.next()) {
-                result.put(resultSet.getString(1), resultSet.getLong(2));
+                resultOneCompany.put(resultSet.getString(1), resultSet.getLong(2));
             }
-
         } catch (SQLException e) {
-            e.printStackTrace();
-            System.out.println("Exception, query didn't give result");
+            throw new RuntimeException("Failed to query result", e);
         }
-        return result;
+        return resultOneCompany;
     }
 
-
-
-    private long getIdByDepartment(Department department) {
-        String query = "SELECT ID FROM COMPANY_B.DEPARTMENTS WHERE DEPARTMENT=?";
+    private long getIdByDepartment(String companyName, Department department) {
+        String query = "SELECT ID FROM " + companyName + ".DEPARTMENTS WHERE DEPARTMENT=?";
         try {
             PreparedStatement statement = connection.prepareStatement(query);
             statement.setString(1, department.getDepartmentName());
@@ -114,14 +147,14 @@ public class EmployeeDaoImpl implements EmployeeDao {
             resultSet.first();
             return resultSet.getLong(1);
         } catch (SQLException e) {
-            saveDepartment(department);
-            return getIdByDepartment(department);
+            saveDepartment(companyName, department);
+            return getIdByDepartment(companyName, department);
         }
     }
 
-    private long getIdByDistrict(District district) {
+    private long getIdByDistrict(String companyName, District district) {
 
-        String query = "SELECT ID FROM COMPANY_B.DISTRICTS WHERE DISTRICT=?";
+        String query = "SELECT ID FROM " + companyName + ".DISTRICTS WHERE DISTRICT=?";
         try {
             PreparedStatement statement = connection.prepareStatement(query);
             statement.setString(1, district.getDistrictName());
@@ -129,26 +162,8 @@ public class EmployeeDaoImpl implements EmployeeDao {
             resultSet.first();
             return resultSet.getLong(1);
         } catch (Exception e) {
-            saveDistrict(district);
-            return getIdByDistrict(district);
-        }
-    }
-
-    private void saveDistrict(District district) {
-        String query = "INSERT INTO COMPANY_B.DISTRICTS (DISTRICT) VALUES(?)";
-        try {
-            PreparedStatement statement = connection.prepareStatement(query);
-            statement.setString(1, district.getDistrictName());
-            statement.executeUpdate();
-        } catch (SQLException e) {
-            System.out.println("Exception, district isn't saved");
+            saveDistrict(companyName, district);
+            return getIdByDistrict(companyName, district);
         }
     }
 }
-
-
-
-
-
-
-
