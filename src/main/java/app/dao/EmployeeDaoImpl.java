@@ -24,6 +24,7 @@ public class EmployeeDaoImpl implements EmployeeDao {
                         "ID BIGINT PRIMARY KEY AUTO_INCREMENT," +
                         "DISTRICT VARCHAR(100) NOT NULL," +
                         "UNIQUE(DISTRICT));" +
+                        "CREATE INDEX DISTRICT_INDEX ON " + companyName + ".DISTRICTS(DISTRICT);" +
 
                         "CREATE TABLE " + companyName + ".DEPARTMENTS (" +
                         "ID BIGINT PRIMARY KEY AUTO_INCREMENT," +
@@ -32,6 +33,7 @@ public class EmployeeDaoImpl implements EmployeeDao {
                         "UNIQUE(DEPARTMENT)," +
                         "CONSTRAINT FK_DEPARTMENTS_TO_DISTRICTS FOREIGN KEY (FK_DISTRICT_ID)" +
                         "REFERENCES DISTRICTS (ID));" +
+                        "CREATE INDEX DEPARTNMENT_INDEX ON " + companyName + ".DEPARTMENTS(DEPARTMENT);" +
 
                         "CREATE TABLE " + companyName + ".EMPLOYEES (" +
                         "ID BIGINT PRIMARY KEY AUTO_INCREMENT," +
