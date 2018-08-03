@@ -52,11 +52,13 @@ public class EmployeeDaoImpl implements EmployeeDao {
 
     public Employee saveEmployee(String companyName, Employee employee) {
         String query = "INSERT INTO " + companyName + ".EMPLOYEES (NAME, AGE, FK_DEPARTMENT_ID) VALUES(?,?,?);";
+        Long departmentId = getIdByDepartment(companyName,employee.getDepartment());
+
         try {
             PreparedStatement statement = connection.prepareStatement(query);
             statement.setString(1, employee.getName());
             statement.setInt(2, employee.getAge());
-            statement.setLong(3, getIdByDepartment(companyName, employee.getDepartment()));
+            statement.setLong(3, departmentId);
             statement.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException("Failed to save employee", e);
@@ -65,11 +67,13 @@ public class EmployeeDaoImpl implements EmployeeDao {
     }
 
     public Department saveDepartment(String companyName, Department department) {
+        Long districtId = getIdByDistrict(companyName,department.getDistrict());
         String query = "INSERT INTO " + companyName + ".DEPARTMENTS (DEPARTMENT, FK_DISTRICT_ID) VALUES(?,?)";
+
         try {
             PreparedStatement statement = connection.prepareStatement(query);
             statement.setString(1, department.getDepartmentName());
-            statement.setLong(2, getIdByDistrict(companyName, department.getDistrict()));
+            statement.setLong(2, districtId);
             statement.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException("Failed to save department", e);
@@ -79,6 +83,7 @@ public class EmployeeDaoImpl implements EmployeeDao {
 
     public District saveDistrict(String companyName, District district) {
         String query = "INSERT INTO " + companyName + ".DISTRICTS (DISTRICT) VALUES(?)";
+
         try {
             PreparedStatement statement = connection.prepareStatement(query);
             statement.setString(1, district.getDistrictName());
@@ -91,6 +96,7 @@ public class EmployeeDaoImpl implements EmployeeDao {
 
     public Map<String, Long> countEmployeesOfDepartment(int minAge, int maxEge, String districtName) {
         Map<String, Long> resultBothComanies = new HashMap<>();
+
         String queryCompany_A = "SELECT DEPARTMENTS.DEPARTMENT, COUNT (EMPLOYEES.NAME) " +
                 "FROM COMPANY_A.EMPLOYEES " +
                 "INNER JOIN COMPANY_A.DEPARTMENTS ON EMPLOYEES.FK_DEPARTMENT_ID=DEPARTMENTS.ID " +
@@ -98,7 +104,6 @@ public class EmployeeDaoImpl implements EmployeeDao {
                 "WHERE DISTRICTS.DISTRICT=(?) AND EMPLOYEES.AGE>(?) AND EMPLOYEES.AGE<(?) " +
                 "GROUP BY DEPARTMENTS.DEPARTMENT";
         Map<String, Long> resultCompany_A = new HashMap<>(addResultToMap(queryCompany_A, minAge, maxEge, districtName));
-
 
         String queryCompany_B = "SELECT DEPARTMENTS.DEPARTMENT, COUNT (EMPLOYEES.NAME)" +
                 "FROM COMPANY_B.EMPLOYEES " +
@@ -117,7 +122,6 @@ public class EmployeeDaoImpl implements EmployeeDao {
                 }
             });
         });
-
         return resultBothComanies;
     }
 

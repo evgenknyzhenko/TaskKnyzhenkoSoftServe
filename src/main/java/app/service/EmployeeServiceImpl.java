@@ -43,7 +43,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         Employee employee = new Employee(null, 0,
                 new Department(null, new District(null)));
 
-        for (int i = 0; i < 1000; i++) {
+        for (int i = 0; i < 100000; i++) {
             employee.setName("Empl_" + count);
             employee.setAge((int) (18 + Math.random() * 80));
             employee.getDepartment().setDepartmentName(departmentNames.get((int)(Math.random() * 6)));
