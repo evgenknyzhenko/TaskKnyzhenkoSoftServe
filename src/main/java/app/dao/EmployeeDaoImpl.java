@@ -52,7 +52,7 @@ public class EmployeeDaoImpl implements EmployeeDao {
 
     public Employee saveEmployee(String companyName, Employee employee) {
         String query = "INSERT INTO " + companyName + ".EMPLOYEES (NAME, AGE, FK_DEPARTMENT_ID) VALUES(?,?,?);";
-        Long departmentId = getIdByDepartment(companyName,employee.getDepartment());
+        Long departmentId = getDepartmentId(companyName,employee.getDepartment());
 
         try {
             PreparedStatement statement = connection.prepareStatement(query);
@@ -67,7 +67,7 @@ public class EmployeeDaoImpl implements EmployeeDao {
     }
 
     public Department saveDepartment(String companyName, Department department) {
-        Long districtId = getIdByDistrict(companyName,department.getDistrict());
+        Long districtId = getDistrictId(companyName,department.getDistrict());
         String query = "INSERT INTO " + companyName + ".DEPARTMENTS (DEPARTMENT, FK_DISTRICT_ID) VALUES(?,?)";
 
         try {
@@ -142,7 +142,7 @@ public class EmployeeDaoImpl implements EmployeeDao {
         return resultOneCompany;
     }
 
-    private long getIdByDepartment(String companyName, Department department) {
+    private long getDepartmentId(String companyName, Department department) {
         String query = "SELECT ID FROM " + companyName + ".DEPARTMENTS WHERE DEPARTMENT=?";
         try {
             PreparedStatement statement = connection.prepareStatement(query);
@@ -152,11 +152,11 @@ public class EmployeeDaoImpl implements EmployeeDao {
             return resultSet.getLong(1);
         } catch (SQLException e) {
             saveDepartment(companyName, department);
-            return getIdByDepartment(companyName, department);
+            return getDepartmentId(companyName, department);
         }
     }
 
-    private long getIdByDistrict(String companyName, District district) {
+    private long getDistrictId(String companyName, District district) {
 
         String query = "SELECT ID FROM " + companyName + ".DISTRICTS WHERE DISTRICT=?";
         try {
@@ -167,7 +167,7 @@ public class EmployeeDaoImpl implements EmployeeDao {
             return resultSet.getLong(1);
         } catch (Exception e) {
             saveDistrict(companyName, district);
-            return getIdByDistrict(companyName, district);
+            return getDistrictId(companyName, district);
         }
     }
 }
